@@ -38,11 +38,10 @@ const BootcampSchema = new mongoose.Schema({
     type: {
       type: String, // Don't do `{ location: { type: String } }`
       enum: ['Point'], // 'location.type' must be 'Point'
-      required: true,
+      // required: true,
     },
     coordinates: {
       type: [Number],
-      required: true,
       index: '2dsphere',
     },
     formattedAddress: String,
@@ -64,4 +63,41 @@ const BootcampSchema = new mongoose.Schema({
       'Other',
     ],
   },
+  averageRating: {
+    type: Number,
+    min: [1, 'Rating must be atleast 1'],
+    max: [10, 'Rating must be atmost 10'],
+  },
+  averageCost: Number,
+  photo: {
+    type: String,
+    default: 'no-photo.jpg',
+  },
+  housing: {
+    type: Boolean,
+    default: false,
+  },
+  jobAssistance: {
+    type: Boolean,
+    default: false,
+  },
+  jobGuarantee: {
+    type: Boolean,
+    default: false,
+  },
+  acceptGi: {
+    type: Boolean,
+    default: false,
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+  user: {
+    type: mongoose.Schema.ObjectId,
+    ref: 'User',
+    // required: true,
+  },
 });
+
+module.exports = mongoose.model('Bootcamp', BootcampSchema);
