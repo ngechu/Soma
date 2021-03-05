@@ -6,10 +6,14 @@ const colors = require('colors');
 
 //Load environment variables
 dotenv.config({ path: './config/config.env' });
-const app = express();
-//Connect to database
 
+//Connect to database
 connectDB();
+
+const app = express();
+
+//Body parser
+app.use(express.json());
 
 //Route files
 const bootcamps = require('./routes/bootcamps');
