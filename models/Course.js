@@ -1,27 +1,27 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const CourseSchema = new mongoose.Schema({
   title: {
     type: String,
     trim: true,
-    required: [true, 'Please add a Course title'],
+    required: [true, "Please add a Course title"],
   },
   description: {
     type: String,
-    required: [true, 'Please add a description'],
+    required: [true, "Please add a description"],
   },
   weeks: {
     type: String,
-    required: [true, 'Please add number of weeks'],
+    required: [true, "Please add number of weeks"],
   },
   tuition: {
-    type: String,
-    required: [true, 'Please add a tuition cost'],
+    type: Number,
+    required: [true, "Please add a tuition cost"],
   },
   minimumSkill: {
     type: String,
-    required: [true, 'Please add a minimum skill'],
-    enum: ['beginner', 'intermediate', 'advanced'],
+    required: [true, "Please add a minimum skill"],
+    enum: ["beginner", "intermediate", "advanced"],
   },
   scholarshipAvailable: {
     type: Boolean,
@@ -33,9 +33,37 @@ const CourseSchema = new mongoose.Schema({
   },
   bootcamp: {
     type: mongoose.Schema.ObjectId,
-    ref: 'Bootcamp',
+    ref: "Bootcamp",
     required: true,
   },
 });
 
-module.exports = mongoose.model('Course', CourseSchema);
+CourseSchema.statics.getAverageCost = async function (bootcampId) {
+  const arr = await this.aggregate([
+    {
+      $match: { bootcamp: bootcampId },
+    },
+    {
+      $group: {
+        _id: "$bootcamp",
+        averageCost: { $avg: "$tuition" },
+      },
+    },
+  ]);
+  try {
+    await this.model("Bootcamp").findByIdAndUpdate(bootcampId, {
+      averageCost: Math.ceil(arr[0].averageCost / 10) * 10,
+    });
+  } catch (e) {}
+};
+
+//Call get average cost after save
+CourseSchema.post("save", function () {
+  this.constructor.getAverageCost(this.bootcamp);
+});
+//Call get average cost before  remove
+CourseSchema.pre("save", function () {
+  this.constructor.getAverageCost(this.bootcamp);
+});
+
+module.exports = mongoose.model("Course", CourseSchema);
