@@ -30,6 +30,12 @@ const BootcampSchema = new mongoose.Schema(
     },
     email: {
       type: String,
+      required: [true, "Please add a email"],
+      unique: true,
+      match: [
+        /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/,
+        "Please add a valid email address",
+      ],
     },
     address: {
       type: String,
@@ -127,18 +133,17 @@ BootcampSchema.pre("save", async function (next) {
   next();
 });
 //Cascade delete courses when a bootcamp is deleted
-BootcampSchema.pre("remove",async function(next){
-  await this.model('Course').deleteMany({bootcamp:this._id})
+BootcampSchema.pre("remove", async function (next) {
+  await this.model("Course").deleteMany({ bootcamp: this._id });
   next();
-})
-
+});
 
 //Reverse populate with schema
-BootcampSchema.virtual('courses',{
-  ref:'Course',
-  localField:'_id',
-  foreignField:'bootcamp',
-  justOne:false
-})
+BootcampSchema.virtual("courses", {
+  ref: "Course",
+  localField: "_id",
+  foreignField: "bootcamp",
+  justOne: false,
+});
 
 module.exports = mongoose.model("Bootcamp", BootcampSchema);
